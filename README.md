@@ -21,7 +21,7 @@ This is my UPenn CIS566 Procedural Graphics course project. **Please refresh the
     - randomly selet several blocks to merge. And there are three strategies I use: merge in X direction, in Z direction or both in X and Z direction. Here is the final blocks I get:
     ![](./Images/gridWithRandomSizeWithMerge.jpg)
 
-- Population density: 2D Perlin noise is used to generate every block's population so that I can create higher building for high density blocks and it's not purely random between near blocks(). Ther result looks good and here is the density I get(the hight of buildings represents density):
+- Population density: 2D Perlin noise is used to generate every block's population so that I can create higher building for high density blocks and it's not purely random between near blocks. The result looks good and here is final density I get(the hight of buildings represents density):
 ![](./Images/densityWithPerlinNoise.jpg)
 
 - Small blocks as parks: after random division and merging some blocks, there will definitly some blocks are too small to generate buildings. Although there is only one tree, I regard them as parks in my city!
