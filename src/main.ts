@@ -20,18 +20,20 @@ import Object from './objLoader';
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-  // geometry : SQUARE,
-  // tesselations: 5,
-  // 'Load Scene': loadScene, // A function pointer, essentially
-  // shaderProg : LAMBERT,
-  // color : [ 140, 140, 140 ], // RGB array
-
   debugShadow: false,
+  animateCamera: true,
   'Camera Info' : printCameraInfo,
 };
 
 // Setup camera
-const camera = new Camera(vec3.fromValues(0, 250, 250), vec3.fromValues(0, 0, 0));
+const camera = new Camera(vec3.fromValues(8.0, 250.0, 300.0), vec3.fromValues(0, 0, 0), true);
+
+// camera key frame positions and speed(last term)
+camera.initKeyframes([vec3.fromValues(8.0, 130.0, 300.0), 
+                      vec3.fromValues(-300.0, 220.0, 8.0),
+                      vec3.fromValues(-8.0, 180.0, -300.0),
+                      vec3.fromValues(300.0, 150.0, -8.0)], 0.01);
+
 
 function printCameraInfo(){
   console.log(camera.controls.eye);
@@ -146,9 +148,9 @@ function GenerateMergedBuildingMeshAndShadowMap(){
       // rotation matrix
       let rotMat = mat4.create();
       mat4.identity(rotMat);
-      mat4.rotateX(rotMat, rotMat, sceneShapeGrammarNodes[i].rot[0]); // remember this is radius
+      //mat4.fromXRotation(rotMatX, sceneShapeGrammarNodes[i].rot[0]); // remember this is radius
       mat4.fromYRotation(rotMat, sceneShapeGrammarNodes[i].rot[1]);
-      mat4.rotateZ(rotMat, rotMat, sceneShapeGrammarNodes[i].rot[2]);
+      //mat4.fromZRotation(rotMatZ, sceneShapeGrammarNodes[i].rot[2]);
 
       // For each triangle of mesh
       for (let _i = 0; _i < targetObj.faces_indices.length; _i++) {
@@ -173,7 +175,6 @@ function GenerateMergedBuildingMeshAndShadowMap(){
           // rotate
           let tmpPos2 = vec4.fromValues(tmpPos[0], tmpPos[1], tmpPos[2], 1.0);
           vec4.transformMat4(tmpPos2, tmpPos2, rotMat);
-
           tmpPos[0] = tmpPos2[0]; tmpPos[1] = tmpPos2[1]; tmpPos[2] = tmpPos2[2];
 
           // translate
@@ -233,9 +234,14 @@ function GenerateMergedBuildingMeshAndShadowMap(){
       // color of this tree
       let tmp =  0.2 + Math.random();
       let thisTreeColor = vec3.fromValues(tmp, tmp, tmp);
+
+      // rotation matrix
+      let rotMat = mat4.create();
+      mat4.identity(rotMat);
+      mat4.fromYRotation(rotMat, 2.0 * Math.random() * 3.1415926);
       
       // scale of this tree
-      let treeScale = base_treeScale + 3.0 * Math.random();
+      let treeScale = base_treeScale + 5.0 * Math.random();
       // For each triangle of mesh
       for (let _i = 0; _i < targetObj.faces_indices.length; _i++) {
         // index
@@ -254,6 +260,11 @@ function GenerateMergedBuildingMeshAndShadowMap(){
           tmpPos[0] = tmpPos[0] * treeScale;
           tmpPos[1] = tmpPos[1] * treeScale;
           
+          // rotate
+          let tmpPos2 = vec4.fromValues(tmpPos[0], tmpPos[1], tmpPos[2], 1.0);
+          vec4.transformMat4(tmpPos2, tmpPos2, rotMat);
+          tmpPos[0] = tmpPos2[0]; tmpPos[1] = tmpPos2[1]; tmpPos[2] = tmpPos2[2];
+
           // translate
           let offsetPos = vec3.fromValues(centroid[0], centroid[1], centroid[2]);
           
@@ -459,10 +470,8 @@ function main() {
   const gui = new DAT.GUI();
 
   // Add controls to the gui
-  // gui.add(controls, 'geometry', [SQUARE, ICOSPHERE, CUBE]).onChange(setGeometry);
-  // gui.add(controls, 'tesselations', 0, 8).step(1).onChange(setTesselation);
-  // gui.add(controls, 'Load Scene');
   gui.add(controls, 'debugShadow');
+  gui.add(controls, 'animateCamera');
   gui.add(controls, 'Camera Info');
 
   // OpenGL Renderer
@@ -525,7 +534,12 @@ function main() {
   // ------------------------------------------------------------
   // This function will be called every frame
   function tick() {
-    camera.update();
+    //camera.update(); // original camera control
+    // animating camera
+    if(controls.animateCamera){
+      camera.animate(0.1);
+    }
+
     stats.begin();
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     

@@ -1,48 +1,36 @@
 
-# Project 5: Shape Grammar
+# Procedural City
 
-For this assignment you'll be building directly off of the L-system code you
-wrote last week.
+This is my UPenn CIS566 Procedural Graphics course project. **Please refresh the demo page several times so that you can see different style cities** and everything(building and city layout) is procedural generated.
 
-**Goal:** to model an urban environment using a shape grammar.
+## [Demo Link]()
 
-**Note:** We’re well aware that a nice-looking procedural city is a lot of work for a single week. Focus on designing a nice building grammar. The city layout strategies outlined in class (the extended l-systems) are complex and not expected. We will be satisfied with something reasonably simple, just not a uniform grid!
+## ScreenShot
+![](./Images/screenshot.jpg)
 
-## Symbol Node (5 points)
-Modify your symbol node class to include attributes necessary for rendering, such as
-- Associated geometry instance
-- Position
-- Scale
-- Anything else you may need
+## Shape Grammar
+- There are low, medium, high three types of buildins and each type has different shape grammar and generate differnet buildings. 
+-  Low buildings are more likely to have a repeating pattern design(in Y direction), medium buildings usually have a pyramid top and super high buildings are likely to rotate(based on parent shape grammar node). 
+- All buldings'(including their children nodes) or trees's size are random(although for some buildings, it's not so obvious).
+- In terms of some building design, I refer a lot from [Procedural City, Part 3: Generating Buildings](https://shamusyoung.com/twentysidedtale/?p=2968) and [Kludge City](http://kludgeworks.com/kludgecity/).
 
-## Grammar design (55 points)
-- Design at least five shape grammar rules for producing procedural buildings. Your buildings should vary in geometry and decorative features (beyond just differently-scaled cubes!). At least some of your rules should create child geometry that is in some way dependent on its parent’s state. (20 points)
-    - Eg. A building may be subdivided along the x, y, or z axis into two smaller buildings
-    - Some of your rules must be designed to use some property about its location. (10 points)
-    - Your grammar should have some element of variation so your buildings are non-deterministic.  Eg. your buildings sometimes subdivide along the x axis, and sometimes the y. (10 points)   
-- Write a renderer that will interpret the results of your shape grammar parser and adds the appropriate geometry to your scene for each symbol in your set. (10 points)
+## City Layout
+- The basic layout is uniform. Here are two extra things I did to make it more realistic:
+    - randomly move the dividing line so that each block has a different size. Here is what I get:
+    ![](./Images/gridWithRandomSize.jpg)
+    - randomly selet several blocks to merge. And there are three strategies I use: merge in X direction, in Z direction or both in X and Z direction. Here is the final blocks I get:
+    ![](./Images/gridWithRandomSizeWithMerge.jpg)
 
-## Create a city (30 points)
-- Add a ground plane or some other base terrain to your scene (0 points, come on now)
-- Using any strategy you’d like, procedurally generate features that demarcate your city into different areas in an interesting and plausible way (Just a uniform grid is neither interesting nor plausible). (20 points)
-    - Suggestions: roads, rivers, lakes, parks, high-population density
-    - Note, these features don’t have to be directly visible, like high-population density, but they should somehow be visible in the appearance or arrangement of your buildings. Eg. High population density is more likely to generate taller buildings
-- Generate buildings throughout your city, using information about your city’s features. Color your buildings with a method that uses some aspect of its state. Eg. Color buildings by height, by population density, by number of rules used to generate it. (5 points)
-- Document your grammar rules and general approach in the readme. (5 points)
-- ???
-- Profit.
+- Population density: 2D Perlin noise is used to generate every block's population so that I can create higher building for high density blocks and it's not purely random between near blocks(). Ther result looks good and here is the density I get(the hight of buildings represents density):
+![](./Images/densityWithPerlinNoise.jpg)
 
-## Make it interesting (10)
-Experiment! Make your city a work of art.
+- Small blocks as parks: after random division and merging some blocks, there will definitly some blocks are too small to generate buildings. Although there is only one tree, I regard them as parks in my city!
 
-## Warnings:
-If you're not careful with how many draw calls you make in a single `tick()`,
-you can very easily blow up your CPU with this assignment. As with the L-system,
-try to group geometry into one VBO so the run-time of your program outside of
-the time spent generating the city is fast.
 
-## Suggestions for the overachievers:
-Go for a very high level of decorative detail!
-Place buildings with a strategy such that buildings have doors and windows that are always accessible.
-Generate buildings with coherent interiors
-If dividing your city into lots, generate odd-shaped lots and create building meshes that match their shape .i.e. rather than working with cubes, extrude upwards from the building footprints you find to generate a starting mesh to subdivide rather than starting with platonic geometry.
+## Other features
+- **Shadow Map**: here is the shadow map I pre-baked before WebGL really render our scene:
+![](./Images/shadow.jpg)
+in terms of some implementation details, I refer a lot to [WebGL Tutorial: Directional Shadow Mapping without extensions](http://www.chinedufn.com/webgl-shadow-mapping-tutorial/)
+- vertex color to simulate **AO**: this idea is from [How to Do a Procedural City in 100 Lines](http://learningthreejs.com/blog/2013/08/02/how-to-do-a-procedural-city-in-100lines/). Basically, instead of using a uniform color for each building, it ues vertex color which is a property of each vertex, and if a vertex is low in Y direction, its color is darker so that, finally, our building looks brighter when it gets higher and this is the same as what we see in our real life because the high portion of one building will definitly receive more sun light.
+- **Fog**: [CREATE A FOG SHADER](http://in2gpu.com/2014/07/22/create-fog-shader/) helps me a lot when I try to implement some fog effects in my city and it blends quite well as a result.
+- Key frame camera motion: It's just a try to better present my city and I disable the original contolable camera, it can be paused using UI.
